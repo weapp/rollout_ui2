@@ -1,0 +1,84 @@
+<div class="panel panel-default">
+  <div class="panel-body">
+    <form class="form-inline" method="post">
+      <div class="form-group form-group-sm">
+        <label for="newfeature">New feature</label>
+        <input type="hidden" name="action" value="new" >
+        <input type="text" name="name" placeholder="feature name" class="form-control" id="newfeature">
+      </div>
+      <button type="submit" class="btn btn-default btn-sm">Create</button>
+    </form>
+  </div>
+</div>
+
+<div>
+  <% @features.each do |feature| %>
+   <div id="feature-<%= feature.name.to_s %>"
+        class="panel panel-default <%= 'has-success panel-success' if public?(feature) %>"
+        style="<%= 'opacity:0.5' if hidden?(feature) %>">
+    <div class="panel-heading">
+      <div >
+        <form class="form-inline pull-right" data-require-confirm="true" method="post">
+          <input type="hidden" name="action" value="delete" >
+          <input type="hidden" name="name" value="<%= feature.name.to_s %>" >
+          <button type="submit" class="glyphicon glyphicon-trash" style="background:none;border:none"><span class="sr-only">Delete</span></button>
+        </form>
+          <span style="opacity:0.2" class="glyphicon glyphicon-<%= icon(feature) %>" aria-hidden="true"></span>
+          &nbsp;
+        <a href="#feature-<%= feature.name.to_s %>" style="color:inherit">
+          <%= feature.name.to_s %>
+        </a>
+      </div>
+    </div>
+    <div class="panel-body" style="position:relative">
+      <div style="background:#F8F8F8;position:absolute;left:0;bottom:0px;height:8px;width:100%"></div>
+      <div style="background:#EEEEEE;position:absolute;left:0;bottom:0px;height:8px;width:<%= feature.percentage %>%"></div>
+      <form class="form-horizontal" method="post">
+        <input type="hidden" name="action" value="update" >
+        <input type="hidden" name="name" value="<%= feature.name.to_s %>" >
+        <div class="form-group form-group-sm">
+          <label class="col-sm-2 control-label" for="percentage">Pecentage</label>
+          <div class="col-sm-2">
+            <div class="input-group">
+              <input type="number" min="0" max="100" step="any" class="form-control" id="percentage" name="percentage" placeholder="0" value="<%=  CGI::escapeHTML(feature.percentage.inspect) %>" style="min-width:5em">
+              <div class="input-group-addon">%</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group form-group-sm">
+          <label class="col-sm-2 control-label" for="groups">Groups</label>
+          <div class="col-sm-5">
+            <select class="form-control" data-role="select2-tags" multiple="multiple" id="groups" name="groups[]">
+              <% (@groups - feature.groups).each do |f| %><option><%= f %></option><% end %>
+              <% feature.groups.each do |f| %><option selected=true><%= f %></option><% end %>
+            </select>
+
+          </div>
+        </div>
+
+        <div class="form-group form-group-sm">
+          <label class="col-sm-2 control-label" for="users">Users</label>
+          <div class="col-sm-5">
+            <select class="form-control" data-role="select2-tags" multiple="multiple" id="users" name="users[]">
+              <% feature.users.each do |f| %><option selected=true><%= f %></option><% end %>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group form-group-sm">
+          <div class="col-sm-offset-2 col-sm-5">
+            <pre><%=  CGI::escapeHTML(feature.data.to_yaml.sub(/\A---\s/, '')) %></pre>
+          </div>
+        </div>
+
+        <div class="form-group form-group-sm">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+          </div>
+        </div>
+      </form>
+     </div>
+   </div>
+  <% end %>
+</div>

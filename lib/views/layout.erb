@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RolloutUi2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Latest compiled and minified CSS -->
+    <link href="<%= u "vendor/bootstrap/css/bootstrap.min.css" %>" rel="stylesheet">
+    <link href="<%= u "vendor/select2/css/select2.min.css" %>" rel="stylesheet">
+    <link href="<%= u "vendor/bootstrap/css/bootstrap-theme.css" %>" rel="stylesheet">
+  </head>
+  <body>
+    <div class="container">
+      <!-- Static navbar -->
+      <nav class="navbar navbar-default" role="navigation">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">RolloutUi2</a>
+        </div>
+      </nav>
+
+      <div>
+        <%if @error then %>
+            <div class="alert alert-error"><%=@error%></div>
+        <% end %>
+        <%= yield %>
+      </div>
+  </div>
+    <script src="<%= u "vendor/jquery-1.9.1.min.js" %>"></script>
+    <script src="<%= u "vendor/bootstrap/js/bootstrap.min.js" %>"></script>
+    <script src="<%= u "vendor/select2/js/select2.min.js" %>"></script>
+    <script src="<%= u "vendor/jq-debounce.min.js" %>"></script>
+    <script type="text/javascript">
+
+
+
+      $('[data-role="select2-tags"]').select2({
+        tags: true,
+        tokenSeparators: [',', ' ']
+      })
+
+      $('[data-require-confirm="true"]').submit(function() {
+          return confirm("Are you sure?");
+      });
+
+      $("input").focusout(function () {
+        $(this).parents("form").submit();
+      });
+    </script>
+
+  </body>
+</html>
