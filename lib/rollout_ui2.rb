@@ -1,6 +1,5 @@
 require "rollout_ui2/version"
 require 'sinatra/base'
-require 'rollout'
 require 'yaml'
 
 module RolloutUi2
@@ -17,7 +16,10 @@ module RolloutUi2
     end
 
     def rollout
-      @rollout ||= Rollout.new(store)
+      @rollout ||= begin
+        require 'rollout'
+        Rollout.new(store)
+      end
     end
 
     def index
@@ -25,7 +27,7 @@ module RolloutUi2
     end
 
     def get(name)
-      rollout.get(name)
+      Feature.new(rollout.get(name))
     end
 
     def save(feature)
@@ -33,7 +35,8 @@ module RolloutUi2
     end
 
     def delete(feature)
-      rollout.delete(feature.name)
+      return rollout.delete(feature.name) if rollout.respond_to?(:delete)
+      rollout.deactivate(feature.name)
     end
 
     private
@@ -57,6 +60,14 @@ module RolloutUi2
 
     def data?
       feature.respond_to?(:data)
+    end
+
+    def groups
+      feature.groups.to_a
+    end
+
+    def users
+      feature.users.to_a
     end
   end
 

@@ -1,0 +1,17 @@
+language: ruby
+sudo: false
+
+services:
+  - redis
+
+script: 'rspec'
+
+rvm:
+  - 2.2.3
+  - ruby-head
+gemfile:
+  - gemfiles/rollout_2_0_0.gemfile
+  - gemfiles/rollout_2_2_1.gemfile
+  - gemfiles/rollout_2_4_0.gemfile
+matrix:
+  fast_finish: true

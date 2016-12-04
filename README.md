@@ -41,7 +41,7 @@ run Rack::URLMap.new(
 )
 ```
 
-Execute `rackup` or `rails s` if you are using rails
+Execute `rackup` or `rails s` if you are using Rails
 
 Visit `http://user:user@localhost:9292/rollout`
 
