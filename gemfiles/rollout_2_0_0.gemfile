@@ -6,3 +6,5 @@ gemspec path: ".."
 group :development do
   gem 'rollout', '= 2.0.0'
 end
+
+gem 'coveralls', require: false

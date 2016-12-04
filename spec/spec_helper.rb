@@ -1,3 +1,10 @@
+begin
+  require 'coveralls'
+  Coveralls.wear!
+rescue
+  'coveralls is optional'
+end
+
 $LOAD_PATH.unshift File.expand_path('../../lib', __FILE__)
 require 'rollout_ui2'
 require 'rollout'
