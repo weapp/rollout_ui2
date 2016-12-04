@@ -1,8 +1,8 @@
 PATH
   remote: ..
   specs:
-    rollout_ui2 (0.1.0)
-      sinatra (~> 1.4.7)
+    rollout_ui2 (0.1.1)
+      sinatra (~> 1.4, >= 1.4.7)
 
 GEM
   remote: https://rubygems.org/

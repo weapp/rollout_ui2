@@ -1,8 +1,6 @@
 # RolloutUi2
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/rollout_ui2`. To experiment with that code, run `bin/console` for an interactive prompt.
-
-TODO: Delete this and the text above, and describe your gem
+Rollout UI for Rollout 2.4!
 
 ## Installation
 
@@ -20,22 +18,40 @@ Or install it yourself as:
 
     $ gem install rollout_ui2
 
+
 ## Usage
 
-TODO: Write usage instructions here
+Edit `config.ru` and add this:
 
-## Development
+```ruby
+# config.ru
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+require 'rollout_ui2'
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+require 'redis'
+RolloutUi2.wrap(Rollout.new(Redis.new))
+
+RolloutUi2::Server.use Rack::Auth::Basic do |user, pass|
+  user == pass
+end
+
+run Rack::URLMap.new(
+  # "/" => Your::App.new,
+  "/rollout" => RolloutUi2::Server
+)
+```
+
+Execute `rackup` or `rails s` if you are using rails
+
+Visit `http://user:user@localhost:9292/rollout`
+
+![screehshot](http://i.imgur.com/gQLOmAD.png)
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/rollout_ui2.
+Bug reports and pull requests are welcome on GitHub at https://github.com/weapp/rollout_ui2.
 
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](http://opensource.org/licenses/MIT).
-
