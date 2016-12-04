@@ -66,11 +66,13 @@
           </div>
         </div>
 
-        <div class="form-group form-group-sm">
-          <div class="col-sm-offset-2 col-sm-5">
-            <pre><%=  CGI::escapeHTML(feature.data.to_yaml.sub(/\A---\s/, '')) %></pre>
+        <% if feature.data? %>
+          <div class="form-group form-group-sm">
+            <div class="col-sm-offset-2 col-sm-5">
+              <pre><%= feature.data %></pre>
+            </div>
           </div>
-        </div>
+        <% end %>
 
         <div class="form-group form-group-sm">
           <div class="col-sm-offset-2 col-sm-10">

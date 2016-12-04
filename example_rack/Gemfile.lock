@@ -23,7 +23,7 @@ PLATFORMS
 
 DEPENDENCIES
   redis
-  rollout
+  rollout (>= 2.0.0)
   rollout_ui2!
 
 BUNDLED WITH

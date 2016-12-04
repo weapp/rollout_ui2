@@ -4,52 +4,70 @@ require 'rollout'
 require 'yaml'
 
 module RolloutUi2
-  def self.wrap(rollout)
-    @rollout = rollout
-  end
+  class << self
+    def wrap(rollout)
+      @rollout = rollout
+    end
 
-  def self.store
-    @store ||= begin
-      require 'redis'
-      Redis.new
+    def store
+      @store ||= begin
+        require 'redis'
+        Redis.new
+      end
+    end
+
+    def rollout
+      @rollout ||= Rollout.new(store)
+    end
+
+    def index
+      rollout.features.empty? ? [] : multi(rollout.features.sort)
+    end
+
+    def get(name)
+      rollout.get(name)
+    end
+
+    def save(feature)
+      rollout.send(:save, feature)
+    end
+
+    def delete(feature)
+      rollout.delete(feature.name)
+    end
+
+    private
+
+    def multi(keys)
+      features = if rollout.respond_to?(:multi_get)
+                   rollout.multi_get(*keys)
+                 else
+                   keys.map { |key| get(key) }
+                 end
+      features.map { |f| Feature.new(f) }
     end
   end
 
-  def self.rollout
-    @rollout ||= Rollout.new(store)
+  class Feature < SimpleDelegator
+    alias feature __getobj__
+
+    def data
+      CGI::escapeHTML(feature.data.to_yaml.sub(/\A---\s/, '')) if data?
+    end
+
+    def data?
+      feature.respond_to?(:data)
+    end
   end
 
-  def self.index
-    rollout.features.empty? ? [] : rollout.multi_get(*rollout.features.sort)
-  end
-
-  def self.get(name)
-    rollout.get(name)
-  end
-
-  def self.save(feature)
-    rollout.send(:save, feature)
-  end
-
-  def self.delete(feature)
-    rollout.delete(feature.name)
-  end
-end
-
-module RolloutUi2
   class Server < Sinatra::Base
-
     helpers do
       def all_groups(features)
         features.reduce([]) { |a, e| a | e.groups }
       end
 
       def as_array(param)
-        if param.respond_to?(:split)
-          param.split(",")
-        else
-          param
-        end
+        param.respond_to?(:split) ? param.split(",") : param || []
       end
 
       def url_path(*path_parts)

@@ -1,6 +1,6 @@
 # RolloutUi2
 
-Rollout UI for Rollout 2.4!
+Rollout UI for Rollout 2!
 
 ## Installation
 

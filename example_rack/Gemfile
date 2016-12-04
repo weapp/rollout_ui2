@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
 gem 'redis'
-gem 'rollout'
+gem 'rollout', '>= 2.0.0'
 
 gem 'rollout_ui2', path: '..'
