@@ -123,4 +123,46 @@ describe RolloutUi2 do
       it { expect(subject.data).to eq("{}\n").or eq(nil) }
     end
   end
+
+  describe RolloutUi2::Server do
+    let(:app) { described_class }
+
+    describe "GET /" do
+      before { rollout_instance.activate_percentage(:chat, 12) }
+      subject { get('/') }
+
+      it do
+        is_expected.to be_ok
+        expect(subject.body).to include("12")
+        expect(subject.body).to include("chat")
+      end
+    end
+
+    describe "POST /" do
+      subject { post("/?name=chat&action=#{action}&percentage=30") }
+
+      context "context=new" do
+        let(:action) { "new" }
+
+        it { is_expected.to be_redirect }
+        it { subject and expect(RolloutUi2.index).to match [RolloutUi2::Feature] }
+      end
+
+      context "context=update" do
+        before { rollout_instance.activate_percentage(:chat, 12) }
+        let(:action) { "update" }
+
+        it { is_expected.to be_redirect }
+        it { subject and expect(RolloutUi2.get(:chat).percentage).to eq 30.0 }
+      end
+
+      context "context=delete" do
+        before { rollout_instance.activate_percentage(:chat, 12) }
+        let(:action) { "delete" }
+
+        it { is_expected.to be_redirect }
+        it { subject and expect(RolloutUi2.get(:chat).percentage).to eq 0 }
+      end
+    end
+  end
 end
