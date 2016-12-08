@@ -1,3 +1,4 @@
+require 'rollout'
 require 'rollout_ui2'
 
 require 'redis'

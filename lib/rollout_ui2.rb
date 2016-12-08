@@ -73,6 +73,24 @@ module RolloutUi2
 
   class Server < Sinatra::Base
     helpers do
+      def active_for(feature, key, user)
+        return unless user && user != ""
+        case key
+        when :any
+          feature.active?(RolloutUi2.rollout, user)
+        when :percentage
+          feature.feature.send(:user_in_percentage?, user) rescue nil
+        when :user
+          feature.feature.send(:user_in_active_users?, user) rescue nil
+        when :group
+          feature.feature.send(:user_in_active_group?, user, RolloutUi2.rollout) rescue nil
+        end && yield || nil
+      end
+
+      def user
+        params[:user]
+      end
+
       def all_groups(features)
         features.reduce([]) { |a, e| a | e.groups }
       end
@@ -127,7 +145,7 @@ module RolloutUi2
         RolloutUi2.save(feature)
       end
 
-      redirect to('/')
+      redirect to("#{request.path_info}?#{request.query_string}")
     end
   end
 end

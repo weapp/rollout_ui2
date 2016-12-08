@@ -7,23 +7,56 @@
     <link href="<%= u "vendor/bootstrap/css/bootstrap.min.css" %>" rel="stylesheet">
     <link href="<%= u "vendor/select2/css/select2.min.css" %>" rel="stylesheet">
     <link href="<%= u "vendor/bootstrap/css/bootstrap-theme.css" %>" rel="stylesheet">
+    <style>
+      .main {
+        margin: auto;
+        max-width: 980px;
+        max-width: 750px;
+      }
+      /* pull-right on all except xs devices */
+      @media (min-width: 768px) {
+        .pull-right-sm {
+          float: right;
+        }
+      }
+
+      /*Make select2 responsive*/
+      [class*="col-"] .select2-container {
+          width:100%!important;
+      }
+      [class*="col-"] .select2-container .select2-search input[type="text"] {
+          padding:2px 4%!important;
+          width:90%!important;
+          margin:5px 2%;
+      }
+      [class*="col-"] .select2-container .select2-drop {
+          width: 100%!important;
+      }
+
+      .has-success .select2-selection__choice,
+      .has-success .select2-selection__choice__remove {
+        color: #3c763d !important;
+        background-color: #dff0d8 !important;
+        border-color: #3c763d !important;
+      }
+    </style>
   </head>
   <body>
-    <div class="container">
-      <!-- Static navbar -->
-      <nav class="navbar navbar-default" role="navigation">
-        <div class="navbar-header">
-          <a class="navbar-brand" href="/">RolloutUi2</a>
-        </div>
-      </nav>
+  <!-- Static navbar -->
+  <nav class="navbar navbar-default" role="navigation">
+    <div class="navbar-header">
+      <a class="navbar-brand" href="/">RolloutUi2</a>
+    </div>
+  </nav>
 
+  <main class="container main">
       <div>
         <%if @error then %>
             <div class="alert alert-error"><%=@error%></div>
         <% end %>
         <%= yield %>
       </div>
-  </div>
+  </main>
     <script src="<%= u "vendor/jquery-1.9.1.min.js" %>"></script>
     <script src="<%= u "vendor/bootstrap/js/bootstrap.min.js" %>"></script>
     <script src="<%= u "vendor/select2/js/select2.min.js" %>"></script>
