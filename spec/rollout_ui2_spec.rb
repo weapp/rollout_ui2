@@ -11,8 +11,9 @@ describe RolloutUi2 do
 
   describe '.wrap' do
     let(:rollout_instance) { double(:rollout) }
+    before { RolloutUi2.wrap(rollout_instance) }
 
-    it { expect(RolloutUi2.wrap(rollout_instance)).to eq(rollout_instance) }
+    it { expect(RolloutUi2.rollout).to eq(rollout_instance) }
   end
 
   describe '.index' do

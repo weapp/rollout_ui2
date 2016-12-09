@@ -1,23 +1,12 @@
-<div class="row" style="padding-bottom:1ex">
-  <div class="col-sm-7">
-    <form class="form-inline" method="post" action="<%= request.fullpath %>">
-      <div class="form-group form-group-sm">
-        <label for="newfeature">New feature</label>
-        <input type="hidden" name="action" value="new" >
-        <input type="text" name="name" placeholder="feature name" class="form-control" id="newfeature">
-      </div>
-      <button type="submit" class="btn btn-default btn-sm">Create</button>
-    </form>
-  </div>
-  <div class="col-sm-5">
-    <form class="form-inline  pull-right-sm" method="get">
-      <div class="form-group form-group-sm">
-        <label for="user">User</label>
-        <input type="text" name="user" placeholder="id" class="form-control" id="user" value="<%= params[:user] %>">
-      </div>
-      <button type="submit" class="btn btn-default btn-sm">Select</button>
-    </form>
-  </div>
+<div class="jumbotron">
+  <label for="newfeature">New feature</label>
+  <form class="form-inline" method="post" action="<%= request.fullpath %>">
+    <div class="form-group form-group-sm">
+      <input type="hidden" name="action" value="new" >
+      <input type="text" name="name" placeholder="feature name" class="form-control" id="newfeature">
+    </div>
+    <button type="submit" class="btn btn-default btn-sm">Create</button>
+  </form>
 </div>
 
 <% @features.each_with_index do |feature, index| %>
@@ -57,8 +46,9 @@
 
         <div class="form-group form-group-sm <%= active_for(feature, :group, user) { "has-success" } %>">
           <label class="col-sm-2 control-label" for="groups">Groups</label>
+
           <div class="col-sm-10">
-            <select class="form-control" data-role="select2-tags" multiple="multiple" id="groups" name="groups[]">
+            <select data-tags="true" style="height:5ex" class="form-control" data-role="select2" multiple="multiple" id="groups" name="groups[]">
               <% (@groups - feature.groups).each do |f| %><option><%= f %></option><% end %>
               <% feature.groups.each do |f| %><option selected=true><%= f %></option><% end %>
             </select>
@@ -69,9 +59,20 @@
         <div class="form-group form-group-sm <%= active_for(feature, :user, user) { "has-success" } %>">
           <label class="col-sm-2 control-label" for="users">Users</label>
           <div class="col-sm-10">
-            <select class="form-control" data-role="select2-tags" multiple="multiple" id="users" name="users[]">
-              <% feature.users.each do |f| %><option selected=true><%= f %></option><% end %>
-            </select>
+            <% if users_provided? %>
+              <select
+                data-tags="true"
+                class="form-control user-api"
+                multiple="multiple"
+                id="users"
+                name="users[]"
+                data-data='<%= users_2_select2(feature.users) %>'>
+              </select>
+            <% else %>
+              <select class="form-control" data-role="select2" multiple="multiple" id="users" name="users[]">
+                <% feature.users.each do |f| %><option selected=true><%= f %></option><% end %>
+              </select>
+            <% end %>
           </div>
         </div>
 

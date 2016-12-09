@@ -4,8 +4,18 @@ require 'yaml'
 
 module RolloutUi2
   class << self
+    def with_finder(finder)
+      @finder = finder
+      self
+    end
+
+    def finder
+      @finder
+    end
+
     def wrap(rollout)
       @rollout = rollout
+      self
     end
 
     def store
@@ -37,6 +47,10 @@ module RolloutUi2
     def delete(feature)
       return rollout.delete(feature.name) if rollout.respond_to?(:delete)
       rollout.deactivate(feature.name)
+    end
+
+    def groups
+
     end
 
     private
@@ -92,7 +106,8 @@ module RolloutUi2
       end
 
       def all_groups(features)
-        features.reduce([]) { |a, e| a | e.groups }
+        defined_groups = RolloutUi2.rollout.instance_eval("@groups").keys rescue []
+        defined_groups | features.reduce([]) { |a, e| a | e.groups }
       end
 
       def as_array(param)
@@ -121,6 +136,27 @@ module RolloutUi2
         return "eye-open" if public?(feature)
         "filter"
       end
+
+      def users_2_select2(users)
+        return users unless users_provided?
+        RolloutUi2
+          .finder
+          .find_by_id(Array(users))
+          .map { |it| it.merge!(selected: true, placeholder: it[:text]) }
+          .to_json
+      end
+
+      def users_provided?
+        !RolloutUi2.finder.nil?
+      end
+    end
+
+    get '/users' do
+      return status 404 unless users_provided?
+      RolloutUi2
+        .finder
+        .search(params["q"], (params["page"] || 1).to_i)
+        .to_json
     end
 
     get '/' do

@@ -7,6 +7,7 @@
     <link href="<%= u "vendor/bootstrap/css/bootstrap.min.css" %>" rel="stylesheet">
     <link href="<%= u "vendor/select2/css/select2.min.css" %>" rel="stylesheet">
     <link href="<%= u "vendor/bootstrap/css/bootstrap-theme.css" %>" rel="stylesheet">
+    <link href="https://fk.github.io/select2-bootstrap-css/css/select2-bootstrap.css" rel="stylesheet">
     <style>
       .main {
         margin: auto;
@@ -21,10 +22,11 @@
       }
 
       /*Make select2 responsive*/
-      [class*="col-"] .select2-container {
+      [class*="col-"] .select2-container, .select2-container{
           width:100%!important;
       }
-      [class*="col-"] .select2-container .select2-search input[type="text"] {
+      [class*="col-"] .select2-container .select2-search input[type="text"],
+       {
           padding:2px 4%!important;
           width:90%!important;
           margin:5px 2%;
@@ -39,44 +41,110 @@
         background-color: #dff0d8 !important;
         border-color: #3c763d !important;
       }
+
+      .select2-selection__rendered img {
+        width: 2.5ex !important;
+      }
+
+      .select2-selection--single, .select2-selection__arrow {
+        height: 34px !important;
+        padding: 2px;
+      }
+
+      .select2-selection__clear {
+        position: absolute;
+        z-index: 200
+      }
+
     </style>
   </head>
   <body>
-  <!-- Static navbar -->
-  <nav class="navbar navbar-default" role="navigation">
-    <div class="navbar-header">
-      <a class="navbar-brand" href="/">RolloutUi2</a>
-    </div>
-  </nav>
-
-  <main class="container main">
+    <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="row">
+          <div class="navbar-header"><a class="navbar-brand" href="/">RolloutUi2</a></div>
+          <form method="get">
+            <div class="col-sm-6 col-sm-offset-4" style="top:7px">
+              <div class="form-group">
+                <div class="input-group select2-bootstrap-append">
+                  <% if users_provided? %>
+                    <select
+                      data-tags="true"
+                      class="form-control user-api"
+                      id="user"
+                      name="user"
+                      data-allow-clear="true"
+                      data-placeholder="Select a user"
+                      data-data='<%= users_2_select2(params["user"]) %>'>
+                      <option></option>
+                    </select>
+                  <% else %>
+                    <input type="text" class="form-control" name="user" value="<%= params[:user] %>" placeholder="Select a user">
+                  <% end %>
+                  <span class="input-group-btn">
+                    <button class="btn btn-default" type="submit" data-select2-open="multi-append">
+                      <span class="glyphicon glyphicon-user"></span>
+                    </button>
+                  </span>
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div><!-- /.container-fluid -->
+    </nav>
+    <main class="container main">
       <div>
-        <%if @error then %>
-            <div class="alert alert-error"><%=@error%></div>
-        <% end %>
+        <%if @error then %><div class="alert alert-error"><%=@error%></div><% end %>
         <%= yield %>
       </div>
-  </main>
+    </main>
     <script src="<%= u "vendor/jquery-1.9.1.min.js" %>"></script>
     <script src="<%= u "vendor/bootstrap/js/bootstrap.min.js" %>"></script>
-    <script src="<%= u "vendor/select2/js/select2.min.js" %>"></script>
+    <script src="<%= u "vendor/select2/js/select2.js" %>"></script>
     <script src="<%= u "vendor/jq-debounce.min.js" %>"></script>
     <script type="text/javascript">
+      $('[data-role="select2"]').select2({tokenSeparators: [',', ' ']})
 
+      function template(item) {
+        if (!item.text) return null;
+        if (!item.picture) return '' + item.text;
+        return "<span><img src=\"" + item.picture + "\"> " + item.text + "</span>";
+      }
 
-
-      $('[data-role="select2-tags"]').select2({
-        tags: true,
-        tokenSeparators: [',', ' ']
-      })
+      $("select.user-api").select2({
+        ajax: {
+          url: "<%= u 'users' %>",
+          dataType: 'json',
+          delay: 250,
+          data: function (params) {
+            return { q: params.term, page: params.page };
+          },
+          processResults: function (data, params) {
+            params.page = params.page || 1;
+            return {
+              results: data.results,
+              pagination: { more: (params.page * data.per_page) < data.total_count }
+            };
+          },
+          cache: true
+        },
+        escapeMarkup: function (markup) { return markup; },
+        minimumInputLength: 1,
+        templateResult: template,
+        templateSelection: template
+      });
 
       $('[data-require-confirm="true"]').submit(function() {
           return confirm("Are you sure?");
       });
 
-      $("input").focusout(function () {
-        $(this).parents("form").submit();
+
+      $(".js-example-placeholder-single").select2({
+        placeholder: "Select a state",
+        allowClear: true
       });
+
     </script>
 
   </body>
