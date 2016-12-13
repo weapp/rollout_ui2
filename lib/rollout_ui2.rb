@@ -49,10 +49,6 @@ module RolloutUi2
       rollout.deactivate(feature.name)
     end
 
-    def groups
-
-    end
-
     private
 
     def multi(keys)
@@ -91,18 +87,26 @@ module RolloutUi2
         return unless user && user != ""
         case key
         when :any
-          feature.active?(RolloutUi2.rollout, user)
+          feature.active?(RolloutUi2.rollout, current_user)
         when :percentage
           feature.feature.send(:user_in_percentage?, user) rescue nil
         when :user
           feature.feature.send(:user_in_active_users?, user) rescue nil
         when :group
-          feature.feature.send(:user_in_active_group?, user, RolloutUi2.rollout) rescue nil
+          feature.feature.send(:user_in_active_group?, current_user, RolloutUi2.rollout) rescue nil
         end && yield || nil
       end
 
       def user
         params[:user]
+      end
+
+      def current_user
+        @_current_user ||= if users_provided?
+                             RolloutUi2.finder.find(user)
+                           else
+                             user
+                           end
       end
 
       def all_groups(features)
@@ -141,7 +145,7 @@ module RolloutUi2
         return users unless users_provided?
         RolloutUi2
           .finder
-          .find_by_id(Array(users))
+          .find_by_ids(Array(users))
           .map { |it| it.merge!(selected: true, placeholder: it[:text]) }
           .to_json
       end
