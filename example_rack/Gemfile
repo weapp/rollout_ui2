@@ -4,5 +4,6 @@ gem 'rerun'
 gem 'pry'
 gem 'redis'
 gem 'rollout', '>= 2.0.0'
+gem 'redis-namespace'
 
 gem 'rollout_ui2', path: '..'

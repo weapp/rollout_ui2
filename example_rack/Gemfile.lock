@@ -1,7 +1,7 @@
 PATH
   remote: ..
   specs:
-    rollout_ui2 (0.2.0)
+    rollout_ui2 (0.4.0)
       sinatra (~> 1.4, >= 1.4.7)
 
 GEM
@@ -25,6 +25,8 @@ GEM
     rb-inotify (0.9.7)
       ffi (>= 0.5.0)
     redis (3.3.2)
+    redis-namespace (1.5.2)
+      redis (~> 3.0, >= 3.0.4)
     rerun (0.11.0)
       listen (~> 3.0)
     rollout (2.4.0)
@@ -42,6 +44,7 @@ PLATFORMS
 DEPENDENCIES
   pry
   redis
+  redis-namespace
   rerun
   rollout (>= 2.0.0)
   rollout_ui2!

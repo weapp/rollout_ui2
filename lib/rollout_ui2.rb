@@ -4,54 +4,54 @@ require 'yaml'
 
 module RolloutUi2
   class << self
-    def with_finder(finder)
-      @finder = finder
+    attr_reader :rollouts
+    attr_reader :finderss
+
+    def with_finder(finder, key: :default)
+      @finders ||= { default: finder }
+      @finders[key] = finder
       self
     end
 
-    def finder
-      @finder
-    end
-
-    def wrap(rollout)
-      @rollout = rollout
+    def wrap(rollout, key: :default, finder: nil)
+      @rollouts ||= { default: rollout }
+      @rollouts[key] = rollout
+      with_finder(finder, key: key) if finder
       self
     end
 
-    def store
-      @store ||= begin
-        require 'redis'
-        Redis.new
-      end
+    def rollout(key = :default)
+      @rollouts[key]
     end
 
-    def rollout
-      @rollout ||= begin
-        require 'rollout'
-        Rollout.new(store)
-      end
+    def finder(key = :default)
+      @finders[key] if @finders
     end
 
-    def index
-      rollout.features.empty? ? [] : multi(rollout.features.sort)
+    def index(key = :default)
+      rollout(key).features.empty? ? [] : multi(rollout(key).features.sort, rollout(key))
     end
 
-    def get(name)
-      Feature.new(rollout.get(name))
+    def get(name, key = :default)
+      Feature.new(rollout(key).get(name))
     end
 
-    def save(feature)
-      rollout.send(:save, feature)
+    def save(feature, key = :default)
+      rollout(key).send(:save, feature)
     end
 
-    def delete(feature)
-      return rollout.delete(feature.name) if rollout.respond_to?(:delete)
-      rollout.deactivate(feature.name)
+    def delete(feature, key = :default)
+      return rollout(key).delete(feature.name) if rollout(key).respond_to?(:delete)
+      rollout(key).deactivate(feature.name)
+    end
+
+    def keys
+      @rollouts.keys.reject { |i| i == :default}
     end
 
     private
 
-    def multi(keys)
+    def multi(keys, rollout)
       features = if rollout.respond_to?(:multi_get)
                    rollout.multi_get(*keys)
                  else
@@ -87,13 +87,13 @@ module RolloutUi2
         return unless user && user != ""
         case key
         when :any
-          feature.active?(RolloutUi2.rollout, current_user)
+          feature.active?(current_rollout, current_user)
         when :percentage
           feature.feature.send(:user_in_percentage?, user) rescue nil
         when :user
           feature.feature.send(:user_in_active_users?, user) rescue nil
         when :group
-          feature.feature.send(:user_in_active_group?, current_user, RolloutUi2.rollout) rescue nil
+          feature.feature.send(:user_in_active_group?, current_user, current_rollout) rescue nil
         end && yield || nil
       end
 
@@ -103,14 +103,26 @@ module RolloutUi2
 
       def current_user
         @_current_user ||= if users_provided?
-                             RolloutUi2.finder.find(user)
+                             current_finder.find(user)
                            else
                              user
                            end
       end
 
+      def current_key
+        (params[:key] || :default).to_sym
+      end
+
+      def current_rollout
+        RolloutUi2.rollout(current_key)
+      end
+
+      def current_finder
+        RolloutUi2.finder(current_key)
+      end
+
       def all_groups(features)
-        defined_groups = RolloutUi2.rollout.instance_eval("@groups").keys rescue []
+        defined_groups = current_rollout.instance_eval("@groups").keys rescue []
         defined_groups | features.reduce([]) { |a, e| a | e.groups }
       end
 
@@ -143,46 +155,44 @@ module RolloutUi2
 
       def users_2_select2(users)
         return users unless users_provided?
-        RolloutUi2
-          .finder
+        current_finder
           .find_by_ids(Array(users))
           .map { |it| it.merge!(selected: true, placeholder: it[:text]) }
           .to_json
       end
 
       def users_provided?
-        !RolloutUi2.finder.nil?
+        !current_finder.nil?
       end
     end
 
     get '/users' do
       return status 404 unless users_provided?
-      RolloutUi2
-        .finder
+      current_finder
         .search(params["q"], (params["page"] || 1).to_i)
         .to_json
     end
 
     get '/' do
-      @features = RolloutUi2.index
+      @features = RolloutUi2.index(current_key)
       @groups = all_groups(@features)
       erb :index
     end
 
     post '/' do
-      feature = RolloutUi2.get(params["name"])
+      feature = RolloutUi2.get(params["name"], current_key)
 
       case params["action"]
       when "new"
-        RolloutUi2.save(feature)
+        RolloutUi2.save(feature, current_key)
       when "delete"
-        RolloutUi2.delete(feature)
+        RolloutUi2.delete(feature, current_key)
       when "update"
         feature.percentage = params["percentage"].to_f
         feature.groups = as_array(params["groups"])
         feature.users = as_array(params["users"])
 
-        RolloutUi2.save(feature)
+        RolloutUi2.save(feature, current_key)
       end
 
       redirect to("#{request.path_info}?#{request.query_string}")

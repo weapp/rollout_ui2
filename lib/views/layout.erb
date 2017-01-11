@@ -61,12 +61,22 @@
   <body>
     <nav class="navbar navbar-default">
       <div class="container">
-        <div class="row">
-          <div class="navbar-header"><a class="navbar-brand" href="/">RolloutUi2</a></div>
-          <form method="get">
-            <div class="col-sm-6 col-sm-offset-4" style="top:7px">
+        <!-- <div class="row"> -->
+          <div class="navbar-header"><a class="navbar-brand" href="?">RolloutUi2</a></div>
+
+          <ul class="nav navbar-nav col-sm-6">
+            <% RolloutUi2.keys.each do |key| %>
+              <li class="<%= "active" if key == current_key %>">
+                <a href="?key=<%= key %>"><%= key %></a>
+              </li>
+            <% end %>
+          </ul>
+
+          <form method="get" style="display: inline">
+            <div class="col-sm-4 pull-right" style="top:7px">
               <div class="form-group">
                 <div class="input-group select2-bootstrap-append">
+                  <input type="hidden" name="key" value="<%= current_key %>">
                   <% if users_provided? %>
                     <select
                       data-tags="true"
@@ -90,7 +100,7 @@
               </div>
             </div>
           </form>
-        </div>
+        <!-- </div> -->
       </div><!-- /.container-fluid -->
     </nav>
     <main class="container main">
@@ -114,14 +124,21 @@
 
       $("select.user-api").select2({
         ajax: {
-          url: "<%= u 'users' %>",
+          url: "<%= u "users?key=#{current_key}" %>",
           dataType: 'json',
           delay: 250,
           data: function (params) {
+            console.log("data")
+            console.log(params)
+            console.log({ q: params.term, page: params.page })
             return { q: params.term, page: params.page };
           },
           processResults: function (data, params) {
+            console.log("processResults")
+            console.log(data)
+            console.log(params)
             params.page = params.page || 1;
+            console.log({ more: (params.page * data.per_page) < data.total_count })
             return {
               results: data.results,
               pagination: { more: (params.page * data.per_page) < data.total_count }
